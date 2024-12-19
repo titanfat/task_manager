@@ -1,4 +1,4 @@
-class BaseRepresenters < Representable::Decorator
+class BaseRepresenter < Representable::Decorator
   include Representable::JSON
 
   defaults render_nil: true

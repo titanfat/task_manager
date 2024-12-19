@@ -97,6 +97,9 @@ GEM
     concurrent-ruby (1.3.4)
     connection_pool (2.4.1)
     crass (1.0.6)
+    data_migrate (11.2.0)
+      activerecord (>= 6.1)
+      railties (>= 6.1)
     date (3.4.0)
     declarative (0.0.20)
     devise (4.9.4)
@@ -154,6 +157,7 @@ GEM
     mini_mime (1.1.5)
     minitest (5.25.2)
     msgpack (1.7.5)
+    multi_json (1.15.0)
     mutex_m (0.3.0)
     net-http (0.6.0)
       uri
@@ -316,12 +320,14 @@ DEPENDENCIES
   annotate
   bootsnap
   byebug
+  data_migrate
   devise_token_auth
   dotenv-rails
   faraday
   fx
   importmap-rails
   jbuilder
+  multi_json
   pg (~> 1.5)
   puma (>= 5.0)
   pundit

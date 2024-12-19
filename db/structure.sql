@@ -21,6 +21,35 @@ CREATE TYPE public.user_role AS ENUM (
 );
 
 
+--
+-- Name: scrub_batches(); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.scrub_batches()
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+current_id INT := (SELECT MIN(id) FROM users);
+max_id INT := (SELECT MAX(id) FROM users);
+batch_size INT := 1000;
+rows_updated INT;
+BEGIN
+WHILE current_id <= max_id LOOP
+-- the UPDATE by `id` range
+UPDATE users
+SET email = SCRUB_EMAIL(email)
+WHERE id >= current_id
+AND id < current_id + batch_size;
+GET DIAGNOSTICS rows_updated = ROW_COUNT;
+COMMIT;
+RAISE NOTICE 'current_id: % - Number of rows updated: %',
+current_id, rows_updated;
+current_id := current_id + batch_size + 1;
+END LOOP;
+END;
+$$;
+
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -45,7 +74,8 @@ CREATE TABLE public.projects (
     id bigint NOT NULL,
     name character varying NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    sprints_count integer
 );
 
 
@@ -83,11 +113,15 @@ CREATE TABLE public.schema_migrations (
 
 CREATE TABLE public.sprints (
     id bigint NOT NULL,
-    start_date date DEFAULT '2024-12-16'::date NOT NULL,
-    end_date date DEFAULT '2024-12-30'::date NOT NULL,
+    start_date date DEFAULT CURRENT_DATE NOT NULL,
+    end_date date DEFAULT (CURRENT_DATE + '14 days'::interval) NOT NULL,
     settings jsonb DEFAULT '{}'::jsonb NOT NULL,
+    project_id bigint NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    tasks_count integer,
+    CONSTRAINT check_start_date_after_created CHECK ((start_date < created_at)),
+    CONSTRAINT check_start_date_before_end_date CHECK ((start_date < end_date))
 );
 
 
@@ -134,7 +168,6 @@ CREATE TABLE public.tasks (
     lead_time integer,
     start_date date,
     end_date date,
-    project_id bigint NOT NULL,
     sprint_id bigint,
     description text,
     history jsonb DEFAULT '{}'::jsonb NOT NULL,
@@ -297,6 +330,13 @@ CREATE UNIQUE INDEX index_projects_on_name ON public.projects USING btree (name)
 
 
 --
+-- Name: index_sprints_on_project_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_sprints_on_project_id ON public.sprints USING btree (project_id);
+
+
+--
 -- Name: index_sprints_on_settings; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -332,24 +372,10 @@ CREATE INDEX index_tasks_on_executor_id ON public.tasks USING btree (executor_id
 
 
 --
--- Name: index_tasks_on_project_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_tasks_on_project_id ON public.tasks USING btree (project_id);
-
-
---
 -- Name: index_tasks_on_sprint_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_tasks_on_sprint_id ON public.tasks USING btree (sprint_id);
-
-
---
--- Name: index_tasks_on_status_and_priority; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_tasks_on_status_and_priority ON public.tasks USING btree (status, priority);
 
 
 --
@@ -405,7 +431,7 @@ CREATE UNIQUE INDEX index_users_on_nickname ON public.users USING btree (nicknam
 -- Name: index_users_on_project_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX index_users_on_project_id ON public.users USING btree (project_id);
+CREATE INDEX index_users_on_project_id ON public.users USING btree (project_id);
 
 
 --
@@ -416,25 +442,10 @@ CREATE UNIQUE INDEX index_users_on_reset_password_token ON public.users USING bt
 
 
 --
--- Name: index_users_on_uid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_users_on_uid ON public.users USING btree (uid);
-
-
---
 -- Name: index_users_on_uid_and_provider; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX index_users_on_uid_and_provider ON public.users USING btree (uid, provider);
-
-
---
--- Name: tasks fk_rails_02e851e3b7; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.tasks
-    ADD CONSTRAINT fk_rails_02e851e3b7 FOREIGN KEY (project_id) REFERENCES public.projects(id);
 
 
 --
@@ -478,6 +489,14 @@ ALTER TABLE ONLY public.sprints_users
 
 
 --
+-- Name: sprints fk_rails_e8206c9686; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sprints
+    ADD CONSTRAINT fk_rails_e8206c9686 FOREIGN KEY (project_id) REFERENCES public.projects(id);
+
+
+--
 -- Name: users fk_rails_fedc809cf8; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -492,6 +511,9 @@ ALTER TABLE ONLY public.users
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20241219180638'),
+('20241218021441'),
+('20241217015106'),
 ('20241216210617'),
 ('20241216210610'),
 ('20241216210554'),

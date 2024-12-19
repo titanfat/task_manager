@@ -9,7 +9,6 @@ class CreateTasks < ActiveRecord::Migration[7.1]
       t.integer :lead_time
       t.date :start_date
       t.date :end_date
-      t.references :project, foreign_key: true, index: true, null: false
       t.references :sprint, foreign_key: true, index: true
       t.text :description
       t.jsonb :history, default: {}, null: false
