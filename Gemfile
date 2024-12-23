@@ -13,14 +13,12 @@ gem 'tailwindcss-rails'
 gem 'turbo-rails'
 gem 'jbuilder'
 
-# Use Redis adapter to run Action Cable in production
-# gem "redis", ">= 4.0.1"
-
 # pd and db supports
 gem 'strong_migrations'
 gem 'scenic'
 gem 'fx'
 gem 'data_migrate'
+gem 'pg_query'
 # dependency
 gem 'multi_json'
 
@@ -32,9 +30,10 @@ gem 'rack-cors'
 gem 'representable'
 gem 'slim-rails'
 gem 'pundit'
-gem 'annotate'
-# Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-# gem "image_processing", "~> 1.2"
+gem 'sidekiq'
+gem 'redis'
+gem "interactor", "~> 3.0"
+gem 'aasm'
 
 group :development, :test do
   gem 'faraday'
@@ -45,6 +44,7 @@ end
 
 group :development do
   gem 'web-console'
+  gem 'annotate'
 end
 
 group :test do

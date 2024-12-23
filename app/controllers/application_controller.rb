@@ -2,7 +2,7 @@ class ApplicationController < ActionController::Base
   include DeviseTokenAuth::Concerns::SetUserByToken
   protect_from_forgery unless: -> { request.format.json? }
   layout :resolve_layout
-  before_action :configure_sign_up_params, only: [:create]
+  before_action :configure_sign_up_params, only: [:create], if: :devise_controller?
   before_action :configure_permitted_parameters, if: :devise_controller?
 
   private

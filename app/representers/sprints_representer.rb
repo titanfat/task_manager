@@ -1,4 +1,4 @@
-class SprintRepresenter < BaseRepresenter
+class SprintsRepresenter < BaseRepresenter
   collection :to_a, as: :sprints do
     property :id
     property :start_date
