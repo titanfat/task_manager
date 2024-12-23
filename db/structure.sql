@@ -113,14 +113,14 @@ CREATE TABLE public.schema_migrations (
 
 CREATE TABLE public.sprints (
     id bigint NOT NULL,
-    start_date date DEFAULT CURRENT_DATE NOT NULL,
-    end_date date DEFAULT (CURRENT_DATE + '14 days'::interval) NOT NULL,
+    start_date timestamp without time zone DEFAULT CURRENT_DATE NOT NULL,
+    end_date timestamp without time zone DEFAULT (CURRENT_DATE + '14 days'::interval) NOT NULL,
     settings jsonb DEFAULT '{}'::jsonb NOT NULL,
     project_id bigint NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
     tasks_count integer,
-    CONSTRAINT check_start_date_after_created CHECK ((start_date < created_at)),
+    CONSTRAINT check_start_date_after_created CHECK ((start_date > created_at)),
     CONSTRAINT check_start_date_before_end_date CHECK ((start_date < end_date))
 );
 
