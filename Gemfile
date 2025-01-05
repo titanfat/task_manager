@@ -8,43 +8,43 @@ gem 'rails', '~> 7.1.3', '>= 7.1.3.4'
 gem 'sprockets-rails'
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
 gem 'importmap-rails'
+gem 'jbuilder'
 gem 'stimulus-rails'
 gem 'tailwindcss-rails'
 gem 'turbo-rails'
-gem 'jbuilder'
 
 # pd and db supports
-gem 'strong_migrations'
-gem 'scenic'
-gem 'fx'
 gem 'data_migrate'
+gem 'fx'
+gem 'pghero'
 gem 'pg_query'
+gem 'scenic'
+gem 'strong_migrations'
 # dependency
 gem 'multi_json'
-
 
 gem 'bootsnap', require: false
 gem 'devise_token_auth'
 gem 'dotenv-rails'
-gem 'rack-cors'
-gem 'representable'
-gem 'slim-rails'
+gem 'interactor', '~> 3.0'
 gem 'pundit'
-gem 'sidekiq'
+gem 'rack-cors'
 gem 'redis'
-gem "interactor", "~> 3.0"
-gem 'aasm'
+gem 'representable'
+gem 'sidekiq'
+gem 'slim-rails'
+gem 'statesman'
 
 group :development, :test do
-  gem 'faraday'
-  gem 'rails_best_practices'
   gem 'active_record_doctor'
   gem 'byebug'
+  gem 'faraday'
+  gem 'rails_best_practices'
 end
 
 group :development do
-  gem 'web-console'
   gem 'annotate'
+  gem 'web-console'
 end
 
 group :test do
