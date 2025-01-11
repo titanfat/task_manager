@@ -48,7 +48,6 @@ class Task < ApplicationRecord
     initial_state: TaskStateMachine.initial_state
   ]
   # TO-DO after state machine/custom status
-  # validates :status, presence: true
 
   scope :in_backlog, -> { where(status: 'backlog') }
 
