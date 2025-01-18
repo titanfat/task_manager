@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'faraday'
 
 class Wrapper::BaseServiceWrapper
@@ -20,7 +21,7 @@ class Wrapper::BaseServiceWrapper
 
 
   def connection
-    @connection ||= Faraday.new(@url, request: { timeout: 5.second  }) do |config|
+    @connection ||= Faraday.new(@url, request: { timeout: 7.second  }) do |config|
       config.headers['Authorization'] = "Basic #{Base64.strict_encode64("#{@api_user}:#{@api_key}")}"
       config.response :json
     end

@@ -27,6 +27,8 @@ gem 'bootsnap', require: false
 gem 'devise_token_auth'
 gem 'dotenv-rails'
 gem 'interactor', '~> 3.0'
+gem 'interactor-contracts'
+gem 'dry-monads'
 gem 'pundit'
 gem 'rack-cors'
 gem 'redis'
