@@ -33,6 +33,10 @@ class Sprint < ApplicationRecord
 
   scope :current, -> { where("start_date <= ? and end_date >= ?", Date.current, Date.current).limit(1).first }
 
+  def admins
+    users.where(role: 'admin')
+  end
+
   private
 
   def create_event_handler
