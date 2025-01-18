@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # == Schema Information
 #
 # Table name: sprints
@@ -32,6 +33,20 @@ class Sprint < ApplicationRecord
   after_commit :create_event_handler, on: :create
 
   scope :current, -> { where("start_date <= ? and end_date >= ?", Date.current, Date.current).limit(1).first }
+
+  def admins
+    users.where(role: 'admin')
+  end
+
+  def settings
+    super || {}
+  end
+
+  def add_state_setting(prev, title, next_state)
+    state_setting = { prev: prev, state: title, next: next_state }
+    self.settings = { states: [].push(state_setting) } || self.settings
+    self.save!
+  end
 
   private
 

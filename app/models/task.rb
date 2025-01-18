@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # == Schema Information
 #
 # Table name: tasks
@@ -43,6 +44,8 @@ class Task < ApplicationRecord
   validates :title, uniqueness: true, length: { maximum: 255 }, presence: true
   validates :priority, numericality: { only_integer: true }, presence: true
 
+  store :history, coder: JSON
+
   include Statesman::Adapters::ActiveRecordQueries[
     transition_class: TaskTransition,
     initial_state: TaskStateMachine.initial_state
@@ -54,6 +57,10 @@ class Task < ApplicationRecord
   delegate :can_transition_to?,
            :current_state, :history, :last_transition, :last_transition_to,
            :transition_to!, :transition_to, :in_state?, to: :state_machine
+
+  def history
+    @history ||= History.new(super)
+  end
 
   def state_machine
     @state_machine ||= TaskStateMachine.new(self, transition_class: TaskTransition)

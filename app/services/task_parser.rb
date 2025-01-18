@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 module TaskParser
   module_function
 
   def tasks_parser(data)
-    attributes = %w[id title description sprint status created creator]
+    attributes = %i[id title description sprint status created creator]
 
     tasks ||= data.map do |issue|
 
@@ -15,19 +17,19 @@ module TaskParser
       attributes.to_h do |attr|
         value =
           case attr
-          when 'id' then issue['key']
-          when 'title' then fields&.dig('summary') || 'Empty title'
-          when 'status' then status&.dig('name')
-          when 'description' then fields['description']
-          when 'created' then fields['created']
-          when 'sprint'
+          when :id then issue['key']
+          when :title then fields&.dig('summary') || 'Empty title'
+          when :status then status&.dig('name')
+          when :description then fields['description']
+          when :created then fields['created']
+          when :sprint
             {
               name: sprint&.dig('name'),
               state: sprint&.dig('state'),
               start_date: sprint&.dig('startDate') || DateTime.current,
               end_date: sprint&.dig('endDate') || DateTime.current + 2.week
             }
-          when 'creator'
+          when :creator
             {
               email: creator['emailAddress'],
               full_name: creator['displayName'],
