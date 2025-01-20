@@ -4,14 +4,16 @@ class Sprint::TaskFetch
   include Interactor
 
   before do
-    @sprint = Sprint.find_by(id: context.payload[:sprint_id])
+    context.fail!(error: "Sprint not found") unless sprint.present?
   end
 
   def call
-    external_task = Wrapper::IssuesSyncWrapper.new(@sprint)
-    if external_task.present?
-      tasks ||= external_task.call()
+    external_task = Wrapper::IssuesSyncWrapper.new(sprint)
+    tasks ||= external_task.call()
+    if tasks.present?
       add_tasks(tasks)
+    else
+      context.fail!(error: "External tasks not found in jira")
     end
   # external_task.errors.empty? ? Success(external_task) : Failure(external_task:errors)
   # TODO: create base interactor with dry monads & validation
@@ -19,29 +21,32 @@ class Sprint::TaskFetch
 
 
   def add_tasks(tasks)
-    return unless tasks.length > 0
+    return unless tasks.any?
 
-    project_admin = @sprint.admins&.first
+    project_admin = @sprint.admins&.first || @sprint.project.users.where(role: "admin")&.first
+    raise "Project admin not found" unless project_admin
 
     tasks.each do |task|
-
-      history_payload = {
-        external_id: task[:id],
-        creator: { email: task[:creator][:email], full_name: task[:creator][:full_name] }
-      }
-
       ActiveRecord::Base.transaction(isolation: :read_committed) do
-        @sprint.tasks.new do |t|
-          t.title = task[:title]
-          t.description = !!task[:description] ? task[:description] : ""
-          t.priority = 0
-          t.status = task[:status].include?('В работе') ? 'processing' : 'new'
-          t.history = history_payload
-          t.author_id = project_admin&.id
-          t.save!
-        end
+        @sprint.tasks.create!(
+          title: task[:title],
+          description: task[:description].presence || "",
+          priority: 0,
+          status: task[:status].include?('В работе') ? 'processing' : 'new',
+          author_id: project_admin&.id,
+          history: {
+            external_id: task[:id],
+            author_email: task[:creator][:email],
+            author_name: task[:creator][:full_name]
+          }
+        )
       end
     end
   end
 
+  private
+
+  def sprint
+    @sprint ||= Sprint.find_by(id: context.payload[:sprint_id])
+  end
 end
