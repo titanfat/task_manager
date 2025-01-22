@@ -1,0 +1,10 @@
+#!/bin/bash -e
+set -e
+
+# If running the rails server then create or migrate existing database
+if [ "$RAILS_ENV" = "development" ]; then
+  echo "Preparing db..."
+  bundle exec rake db:prepare
+fi
+
+exec "$@"
