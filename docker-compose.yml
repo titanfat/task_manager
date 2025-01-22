@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  web:
+    image: task_dev_test
+    ports:
+      - 3000:3000
+    environment:
+      - DATABASE_URL=postgres://postgres@postgres/task_manager
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+
+
+  postgres:
+    image: postgres:16.6-alpine
+    platform: linux/arm64
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    env_file:
+      - .env
+
+  redis:
+    image: redis:latest
+    platform: linux/arm64
+
+  sidekiq:
+    image: task_dev_test
+    depends_on:
+      - postgres
+      - redis
+    container_name: sidekiq_worker
+    environment:
+      - RAILS_ENV=development
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/task_manager
+    env_file:
+      - .env
+    command: ["bundle", "exec", "sidekiq"]
+
+volumes:
+  postgres:
+  redis:

@@ -40,3 +40,4 @@
 .idea
 .byebug_history
 dump.rdb
+.env.production
