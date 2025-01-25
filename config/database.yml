@@ -5,13 +5,13 @@ default: &default
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   username: <%= ENV["DB_USERNAME"] %>
-  password: <%= ENV["DB_PASSWORD"] %>
+  password: <%= ENV.fetch("DB_PASSWORD") { '' } %>
 
 
 development:
   <<: *default
   database: task_manager_development
-  host: <%= ENV["DB_HOST"] %>
+  host: <%= ENV.fetch("DB_HOST") { 'localhost' } %>
 
 test:
   <<: *default

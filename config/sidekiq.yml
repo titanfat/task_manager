@@ -2,3 +2,5 @@
 :timeout: <%= ENV.fetch("SIDEKIQ_TIMEOUT_SECONDS") { 25 } %>
 :queues:
   - default
+:redis:
+  url: <%= ENV.fetch("SIDEKIQ_REDIS_URL") %>
