@@ -3,22 +3,22 @@
 #
 # Table name: tasks
 #
-#  id          :bigint           not null, primary key
-#  body        :text
-#  description :text
-#  end_date    :date
-#  history     :jsonb            not null
-#  lead_time   :integer
-#  priority    :integer          default(0), not null
-#  start_date  :date
-#  status      :string           not null
-#  tags        :string           default([]), not null, is an Array
-#  title       :string           not null
-#  created_at  :datetime         not null
-#  updated_at  :datetime         not null
-#  author_id   :bigint           not null
-#  executor_id :bigint
-#  sprint_id   :bigint
+#  id               :bigint           not null, primary key
+#  body             :text
+#  description      :text
+#  end_date         :date
+#  external_history :jsonb            not null
+#  lead_time        :integer
+#  priority         :integer          default(0), not null
+#  start_date       :date
+#  status           :string           not null
+#  tags             :string           default([]), not null, is an Array
+#  title            :string           not null
+#  created_at       :datetime         not null
+#  updated_at       :datetime         not null
+#  author_id        :bigint           not null
+#  executor_id      :bigint
+#  sprint_id        :bigint
 #
 # Indexes
 #
@@ -44,7 +44,7 @@ class Task < ApplicationRecord
   validates :title, uniqueness: true, length: { maximum: 255 }, presence: true
   validates :priority, numericality: { only_integer: true }, presence: true
 
-  store :history, coder: JSON
+  attribute :external_history, TaskStruct::HistoryType.new
 
   include Statesman::Adapters::ActiveRecordQueries[
     transition_class: TaskTransition,
@@ -58,8 +58,8 @@ class Task < ApplicationRecord
            :current_state, :history, :last_transition, :last_transition_to,
            :transition_to!, :transition_to, :in_state?, to: :state_machine
 
-  def history
-    @history ||= History.new(super)
+  def external_history
+    super || TaskStruct::History.new
   end
 
   def state_machine
