@@ -43,7 +43,7 @@ class Sprint < ApplicationRecord
   end
 
   def add_state_setting(prev, title, next_state)
-    state_setting = { prev: prev, state: title, next: next_state }
+    state_setting = { prev:, state: title, next: next_state }
     self.settings = { states: [].push(state_setting) } || self.settings
     self.save!
   end
@@ -51,14 +51,12 @@ class Sprint < ApplicationRecord
   private
 
   def create_event_handler
-    ActiveSupport::Notifications.instrument('sprint.created', sprint_id: self.id)
+    EventBus.instance.publish('sprint.created', sprint_id: id)
   end
 
   def dates_valid
     return if start_date.blank? || end_date.blank?
 
-    if start_date > end_date
-      errors.add(:start_date, "Sprint cannot be earlier")
-    end
+    errors.add(:start_date, "Sprint cannot be earlier") if start_date > end_date
   end
 end

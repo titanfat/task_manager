@@ -67,6 +67,31 @@ CREATE TABLE public.ar_internal_metadata (
 
 
 --
+-- Name: employees; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.employees (
+    id integer NOT NULL,
+    name character varying(50),
+    city character varying(50),
+    department character varying(50),
+    salary integer
+);
+
+
+--
+-- Name: expenses; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.expenses (
+    year integer,
+    month integer,
+    income integer,
+    expense integer
+);
+
+
+--
 -- Name: projects; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -120,7 +145,6 @@ CREATE TABLE public.sprints (
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL,
     tasks_count integer,
-    CONSTRAINT check_start_date_after_created CHECK ((start_date > created_at)),
     CONSTRAINT check_start_date_before_end_date CHECK ((start_date < end_date))
 );
 
@@ -170,7 +194,7 @@ CREATE TABLE public.tasks (
     end_date date,
     sprint_id bigint,
     description text,
-    history jsonb DEFAULT '{}'::jsonb NOT NULL,
+    external_history jsonb DEFAULT '{}'::jsonb NOT NULL,
     tags character varying[] DEFAULT '{}'::character varying[] NOT NULL,
     priority integer DEFAULT 0 NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
@@ -280,6 +304,14 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 ALTER TABLE ONLY public.ar_internal_metadata
     ADD CONSTRAINT ar_internal_metadata_pkey PRIMARY KEY (key);
+
+
+--
+-- Name: employees employees_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.employees
+    ADD CONSTRAINT employees_pkey PRIMARY KEY (id);
 
 
 --
@@ -511,6 +543,7 @@ ALTER TABLE ONLY public.users
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20250228011501'),
 ('20241219180638'),
 ('20241218021441'),
 ('20241217015106'),

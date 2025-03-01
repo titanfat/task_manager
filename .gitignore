@@ -41,3 +41,4 @@
 .byebug_history
 dump.rdb
 .env.production
+t. log

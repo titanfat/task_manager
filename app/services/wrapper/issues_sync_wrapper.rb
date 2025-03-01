@@ -53,8 +53,8 @@ class Wrapper::IssuesSyncWrapper < Wrapper::BaseServiceWrapper
 
     raise "Fail fetch tasks #{response.status}" unless response.success?
 
-      response = response&.body
-      response['issues']
+      response = response&.body.deep_symbolize_keys
+      response[:issues]
    end
   end
 end
